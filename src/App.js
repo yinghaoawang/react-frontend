@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Link, Route } from "react-router-dom";
 import Home from './pages/Home';
 import Admin from './pages/Admin';
@@ -8,8 +8,23 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 function App() {
+  // console.log(localStorage);
+  // console.log(localStorage.getItem("tokens"));
+  const existingTokens = JSON.parse(localStorage.getItem("tokens"));
+
+  const [authTokens, setAuthTokens] = useState(existingTokens);
+
+  const setTokens = (data) => {
+    if (typeof(data) == 'undefined') {
+      localStorage.removeItem("tokens");
+    } else {
+      localStorage.setItem("tokens", JSON.stringify(data));
+    }
+    setAuthTokens(data);
+  }
+
   return (
-      <AuthContext.Provider value={false}>
+      <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
         <Router>
           <div>
             <ul>
