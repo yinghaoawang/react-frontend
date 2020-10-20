@@ -3,11 +3,11 @@ import {Redirect} from 'react-router';
 import { Link } from 'react-router-dom';
 import { Card, Logo, Form, Input, Button, Error } from '../components/AuthForms';
 import axios from 'axios';
-import { useAuth } from "../context/auth";
+import { useAuth } from "../context/AuthContext";
 
 function Login(props) {
-    //console.log(props.location.state);
-    const referer = props.location.state.referer.pathname || '/';
+    //console.log(props.location);
+    const referer = props.location.location ? props.location.state.referer.pathname || '/' : '/';
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 

@@ -1,8 +1,8 @@
 import React from 'react';
 import { Button } from "../components/AuthForms";
-import { useAuth } from "../context/auth";
+import { useAuth } from "../context/AuthContext";
 
-export default function Admin(props) {
+export default function Admin() {
     const { setAuthTokens } = useAuth();
 
     const logOut = () => {

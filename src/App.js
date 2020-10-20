@@ -1,71 +1,87 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Link, Route } from "react-router-dom";
+import React from 'react';
+import {BrowserRouter as Router, Link, Route} from "react-router-dom";
 import Home from './pages/Home';
 import Admin from './pages/Admin';
 import PrivateRoute from "./PrivateRoute";
-import { AuthContext } from "./context/auth";
+import {AuthContext} from "./context/AuthContext";
+import {ProductContext} from "./context/ProductContext";
+import {CartContext} from './context/CartContext';
+import Navigation from "./components/Navigation";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import ShoppingCart from './components/ShoppingCart';
-import Product from "./components/Product";
-import Products from "./components/Products";
+import ShoppingCart from './pages/ShoppingCart';
+import Products from "./pages/Products";
 import data from "./data";
 
-function App() {
-  // console.log(localStorage);
-  // console.log(localStorage.getItem("tokens"));
-  const existingTokens = JSON.parse(localStorage.getItem("tokens"));
+export default class App extends React.Component {
+  constructor(props) {
+    super(props);
+    const existingTokens = JSON.parse(localStorage.getItem("tokens"));
+    this.state = {
+      authTokens: existingTokens,
+      cart: [],
+      products: data,
+      userRole: 0
+    }
+    this.setTokens = this.setTokens.bind(this);
+    this.addItem = this.addItem.bind(this);
+    this.isAdmin = this.isAdmin.bind(this);
+    this.isLoggedIn = this.isLoggedIn.bind(this);
+  }
 
-  const [authTokens, setAuthTokens] = useState(existingTokens);
-  const [cart, setCart] = useState([]);
-  const [products] = useState(data);
+  isAdmin() {
 
-  const setTokens = (data) => {
-    if (typeof(data) == 'undefined') {
+    return false;
+  }
+
+  isLoggedIn() {
+    return false;
+  }
+
+  setTokens(data) {
+    if (typeof (data) == 'undefined') {
       localStorage.removeItem("tokens");
     } else {
       localStorage.setItem("tokens", JSON.stringify(data));
     }
-    setAuthTokens(data);
   }
 
-  const addItem = (item) => {
-
+  addItem(item) {
+    const cart = this.state.cart;
+    cart.push(item);
+    this.setState({cart});
   }
 
-  return (
-      <AuthContext.Provider value={{ authTokens, setAuthTokens: setTokens }}>
-        <Router>
-          <div>
-            <ul>
-              <li>
-                <Link to="/">Home Page</Link>
-              </li>
-              <li>
-                <Link to="/admin">Admin Page</Link>
-              </li>
-              <li>
-                <Link to="/cart">Cart</Link>
-              </li>
-              <li>
-                <Link to="/products">Products</Link>
-              </li>
-            </ul>
-            <Route exact path="/" component={Home} />
-            <Route path="/login" component={Login} />
-            <Route path="/signup" component={Signup} />
-            <PrivateRoute path="/admin" component={Admin} />
+  render() {
+    const { products, cart, authTokens } = this.state;
+    const { addItem, setTokens, isAdmin, isLoggedIn } = this;
+    return (
+        <ProductContext.Provider value={{products}}>
+          <CartContext.Provider value={{cart, addItem}}>
 
-            <Route path="/cart">
-              <ShoppingCart cart={cart} />
-            </Route>
-            <Route exact path="/products">
-              <Products products={products} addItem={addItem} />
-            </Route>
-          </div>
-        </Router>
-      </AuthContext.Provider>
-  );
-}
+            <AuthContext.Provider value={{authTokens, setAuthTokens: setTokens, isAdmin, isLoggedIn}}>
+              <Router>
+                <div>
+                  <Navigation/>
 
-export default App;
+                  <Route exact path="/" component={Home}/>
+                  <Route path="/login" component={Login}/>
+                  <Route path="/signup" component={Signup}/>
+                  <PrivateRoute path="/admin" component={Admin}/>
+
+                  <Route path="/cart">
+                    <ShoppingCart/>
+                  </Route>
+                  <Route exact path="/products">
+                    <Products/>
+                  </Route>
+
+                </div>
+              </Router>
+            </AuthContext.Provider>
+
+          </CartContext.Provider>
+        </ProductContext.Provider>
+    );
+  }
+};
